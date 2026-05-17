@@ -1,127 +1,223 @@
-import React, { useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {
   Github,
   Linkedin,
-  ExternalLink,
   Mail,
   Code2,
   Cpu,
   Globe,
   Layers,
-  Smartphone,
-  Database,
   Server,
   Monitor,
   Zap,
-  Star,
   CheckCircle2,
   Instagram,
   Terminal,
   Slack,
   Twitter,
   ArrowUpRight,
-  Camera,
   User,
-  Quote,
+  MapPin,
+  BookOpen,
+  Send,
+  Sparkles,
+  Award,
 } from 'lucide-react';
-import './App.css';
-import GlassCard from './components/GlassCard';
-import SectionHeading from './components/SectionHeading';
-import SmoothScroll from './components/SmoothScroll';
-import StaggeredGrid from './components/StaggeredGrid';
-import TestimonialsCard from './components/TestimonialsCard';
 
-const galleryItems = [
-  {
-    id: 1,
-    title: 'Visionary Development',
-    description: 'Working on complex systems requires focus. This captures the essence of deep work and problem-solving.',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'Global Connectivity',
-    description: 'Bridging the gap between design and functionality. A moment of clarity in architecture design.',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: 3,
-    title: 'Premium Interfaces',
-    description: 'My design philosophy is simple: clean, efficient, and user-first. Every pixel serves a purpose.',
-    image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=1000&auto=format&fit=crop',
-  },
-];
+const MouseEnterContext = createContext([false, () => {}]);
+
+const CardContainer = ({ children, className = '', containerClassName = '' }) => {
+  const containerRef = useRef(null);
+  const [isMouseEnter, setIsMouseEnter] = useState(false);
+
+  const handleMouseMove = (event) => {
+    if (!containerRef.current) return;
+
+    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+    const x = (event.clientX - left - width / 2) / 12;
+    const y = (event.clientY - top - height / 2) / 12;
+    containerRef.current.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!containerRef.current) return;
+    setIsMouseEnter(false);
+    containerRef.current.style.transform = 'rotateY(0deg) rotateX(0deg)';
+  };
+
+  return (
+    <MouseEnterContext.Provider value={[isMouseEnter, setIsMouseEnter]}>
+      <div className={`flex items-center justify-center ${containerClassName}`} style={{ perspective: '1000px' }}>
+        <div
+          ref={containerRef}
+          onMouseEnter={() => setIsMouseEnter(true)}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className={`relative flex items-center justify-center transition-all duration-200 ease-out ${className}`}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          {children}
+        </div>
+      </div>
+    </MouseEnterContext.Provider>
+  );
+};
+
+const CardBody = ({ children, className = '' }) => (
+  <div className={`h-full w-full [transform-style:preserve-3d] ${className}`}>{children}</div>
+);
+
+const CardItem = ({
+  as: Tag = 'div',
+  children,
+  className = '',
+  translateZ = 0,
+  translateX = 0,
+  translateY = 0,
+  rotateX = 0,
+  rotateY = 0,
+  rotateZ = 0,
+  ...rest
+}) => {
+  const [isMouseEnter] = useContext(MouseEnterContext);
+  const transform = isMouseEnter
+    ? `translateZ(${translateZ}px) translateX(${translateX}px) translateY(${translateY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`
+    : 'translateZ(0px) translateX(0px) translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)';
+
+  return (
+    <Tag className={`transition-all duration-300 ease-out ${className}`} style={{ transform, transformStyle: 'preserve-3d' }} {...rest}>
+      {children}
+    </Tag>
+  );
+};
+
+const SmoothScroll = ({ children }) => <div className="smooth-scroll-wrapper overflow-x-hidden">{children}</div>;
+
+const GlassCard = ({ children, className = '' }) => (
+  <div
+    className={`overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl transition-all duration-500 hover:border-purple-500/30 ${className}`}
+  >
+    {children}
+  </div>
+);
+
+const SectionHeading = ({ title, subtitle }) => (
+  <div className="mb-12 space-y-2">
+    <div className="flex items-center gap-2">
+      <div className="h-px w-8 bg-purple-500" />
+      <h3 className="font-mono text-xs uppercase tracking-widest text-purple-500">{subtitle}</h3>
+    </div>
+    <h2 className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-5xl">
+      {title}
+    </h2>
+  </div>
+);
+
+const StaggeredGrid = ({ bentoItems, centerText }) => (
+  <div className="relative w-full overflow-hidden py-12">
+    <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
+      <h2 className="whitespace-nowrap text-[15vw] font-black uppercase leading-none tracking-tighter text-white/[0.015] md:text-[18vw]">
+        {centerText}
+      </h2>
+    </div>
+
+    <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {bentoItems.map((item) => (
+          <div
+            key={item.id}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40 backdrop-blur-md transition-all duration-500 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(124,58,237,0.15)]"
+          >
+            <div className="absolute inset-0 z-0 h-80">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="h-full w-full object-cover opacity-20 transition-all duration-700 group-hover:scale-105 group-hover:opacity-40"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-transparent" />
+            </div>
+
+            <div className="relative z-10 flex flex-col justify-end p-8 pt-44">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="rounded-lg bg-purple-500/10 p-2 text-purple-400">{item.icon}</div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-purple-400">{item.subtitle}</span>
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-white">{item.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-400">{item.description}</p>
+              <div className="mt-4 flex items-center gap-1.5 font-mono text-xs text-purple-400/80 transition-colors group-hover:text-purple-400">
+                <span>Explore Repository</span>
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 const bentoItems = [
   {
     id: 1,
-    title: 'Repository',
+    title: 'Repository Hub',
     subtitle: 'Version Control',
-    description: 'Secure, scalable code management.',
-    icon: <Code2 className="w-4 h-4" />,
+    description: 'Secure, highly organized codebases demonstrating structured versioning, modularity, and readable structure.',
+    icon: <Github className="h-4 w-4" />,
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop',
   },
   {
     id: 2,
-    title: 'Infrastructure',
-    subtitle: 'Cloud Ops',
-    description: 'Reliable deployment and service monitoring.',
-    icon: <Server className="w-4 h-4" />,
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop',
+    title: 'Active Connect',
+    subtitle: 'Team Ecosystem',
+    description: 'Asynchronous communication, real-time message architectures, and professional integration pathways.',
+    icon: <Slack className="h-4 w-4" />,
+    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000&auto=format&fit=crop',
   },
   {
     id: 3,
-    title: 'Product',
-    subtitle: 'Mobile & Web',
-    description: 'Responsive experiences across every screen.',
-    icon: <Smartphone className="w-4 h-4" />,
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop',
-  },
-  {
-    id: 4,
-    title: 'Data',
-    subtitle: 'Database Design',
-    description: 'High-performance storage patterns and analytics.',
-    icon: <Database className="w-4 h-4" />,
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1000&auto=format&fit=crop',
+    title: 'Global Reach',
+    subtitle: 'Audience Engagement',
+    description: 'Deploying high-performance digital experiences accessible worldwide across all networking bounds.',
+    icon: <Twitter className="h-4 w-4" />,
+    image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1000&auto=format&fit=crop',
   },
 ];
 
-const featureCards = [
+const skillsData = [
   {
-    id: 1,
-    icon: <Cpu className="w-5 h-5" />, 
-    label: 'Performance',
-    value: 'Optimized for speed',
+    category: 'Programming Languages',
+    icon: <Code2 className="h-5 w-5 text-purple-400" />,
+    skills: ['C', 'C++', 'Python', 'JavaScript', 'SQL'],
   },
   {
-    id: 2,
-    icon: <Monitor className="w-5 h-5" />,
-    label: 'Interface',
-    value: 'Polished screen-first layouts',
+    category: 'CS Fundamentals',
+    icon: <Cpu className="h-5 w-5 text-blue-400" />,
+    skills: ['Data Structures & Algorithms', 'DBMS', 'Computer Networks', 'OOP Concepts', 'Problem Solving'],
   },
   {
-    id: 3,
-    icon: <Layers className="w-5 h-5" />,
-    label: 'Architecture',
-    value: 'Modular, scalable builds',
+    category: 'Web Development',
+    icon: <Globe className="h-5 w-5 text-emerald-400" />,
+    skills: ['React.js', 'Node.js', 'Express.js', 'MongoDB', 'REST APIs', 'Tailwind CSS'],
   },
   {
-    id: 4,
-    icon: <Star className="w-5 h-5" />,
-    label: 'Quality',
-    value: 'Production-tested workflows',
+    category: 'Tools & Platforms',
+    icon: <Layers className="h-5 w-5 text-amber-400" />,
+    skills: ['Git', 'GitHub', 'Postman', 'VS Code', 'Vercel', 'Render'],
   },
 ];
+
+const portraitFallback =
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop';
 
 export default function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isScrolled, setIsScrolled] = useState(false);
+  const [formState, setFormState] = useState({ name: '', email: '', message: '' });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
+    const handleMouseMove = (event) => setMousePos({ x: event.clientX, y: event.clientY });
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
-
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
 
@@ -131,178 +227,544 @@ export default function App() {
     };
   }, []);
 
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    if (!formState.name || !formState.email || !formState.message) return;
+
+    setIsSubmitted(true);
+    window.setTimeout(() => {
+      setIsSubmitted(false);
+      setFormState({ name: '', email: '', message: '' });
+    }, 4000);
+  };
+
+  const handleImageError = (event) => {
+    event.currentTarget.src = portraitFallback;
+  };
+
   return (
     <SmoothScroll>
-      <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-purple-500/30">
+      <div className="min-h-screen overflow-hidden bg-[#0A0A0A] font-sans text-white selection:bg-purple-500/30">
         <div
-          className="fixed inset-0 pointer-events-none z-0 opacity-40 transition-opacity duration-300"
+          className="pointer-events-none fixed inset-0 z-0 opacity-40 transition-opacity duration-300"
           style={{
-            background: `radial-gradient(circle 600px at ${mousePos.x}px ${mousePos.y}px, rgba(124, 58, 237, 0.18), transparent 80%)`,
+            background: `radial-gradient(circle 600px at ${mousePos.x}px ${mousePos.y}px, rgba(124, 58, 237, 0.12), transparent 85%)`,
           }}
         />
+        <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,#1f1f2e_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.05] [mask-image:radial-gradient(ellipse_600px_600px_at_50%_50%,#000_40%,transparent_100%)]" />
 
         <nav
-          className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-            isScrolled ? 'backdrop-blur-md bg-black/70 border-b border-white/10 py-4' : 'bg-transparent py-6'
+          className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+            isScrolled ? 'border-b border-white/10 bg-[#0A0A0A]/80 py-4 backdrop-blur-md' : 'bg-transparent py-6'
           }`}
         >
-          <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <div className="flex items-center gap-3 cursor-pointer">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-blue-500 grid place-items-center text-sm font-bold shadow-[0_0_20px_rgba(124,58,237,0.25)]">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+            <a href="#home" className="group flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-600 to-blue-600 font-mono text-xl font-bold shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-transform group-hover:rotate-12">
                 D
               </div>
-              <span className="font-bold text-xl tracking-tight">Deep<span className="text-purple-500">.dev</span></span>
-            </div>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold leading-none tracking-tight">Deep Vagadiya</span>
+                <span className="mt-1 font-mono text-[10px] uppercase tracking-wider text-purple-400">CS @ BVM</span>
+              </div>
+            </a>
 
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-              {['Home', 'Projects', 'Visuals', 'Journey', 'Contact'].map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">
+            <div className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
+              {['Home', 'About', 'Photos', 'Skills', 'Projects', 'Contact'].map((item) => (
+                <a key={item} href={`#${item.toLowerCase()}`} className="tracking-wide transition-colors hover:text-white">
                   {item}
                 </a>
               ))}
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 rounded-full bg-white text-black px-5 py-2 font-semibold hover:bg-purple-500 hover:text-white transition-all"
+                className="rounded-full bg-white px-5 py-2 text-xs font-bold text-black shadow-[0_4px_12px_rgba(255,255,255,0.1)] transition-all hover:bg-purple-500 hover:text-white"
               >
-                Contact <Mail className="w-4 h-4" />
+                Hire Founder
               </a>
             </div>
           </div>
         </nav>
 
         <main className="relative z-10">
-          <section id="home" className="pt-32 pb-16 px-6 min-h-[90vh] flex flex-col justify-center">
-            <div className="max-w-6xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-purple-500/20 bg-purple-500/5 text-purple-300 text-xs uppercase tracking-[0.35em]">
-                <Zap className="w-3.5 h-3.5" /> AVAILABLE FOR NEW PROJECTS
-              </div>
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight mb-6">
-                Deep <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Vagadiya</span>
-              </h1>
-              <p className="mx-auto text-slate-300 text-base md:text-xl max-w-3xl leading-relaxed">
-                Full stack developer building premium digital experiences for startups, products, and modern brands.
-              </p>
-              <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a
-                  href="#projects"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-black shadow-xl shadow-white/10 transition-transform hover:-translate-y-1"
-                >
-                  View Projects <ArrowUpRight className="w-4 h-4" />
-                </a>
-                <a
-                  href="#visuals"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-                >
-                  Explore Visuals <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
+          <section id="home" className="relative flex min-h-[92vh] flex-col items-center justify-center px-6 pb-20 pt-36 text-center">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-purple-400">
+              <Zap className="h-3.5 w-3.5 animate-pulse text-yellow-400" />
+              EXPLORING CORE COMPUTER SCIENCE & DEVELOPMENT
+            </div>
 
-              <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {featureCards.map((card) => (
-                  <div key={card.id} className="rounded-3xl border border-white/10 bg-zinc-900/50 p-5 backdrop-blur-xl">
-                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 text-purple-300 mb-4">
-                      {card.icon}
-                    </div>
-                    <p className="text-xs uppercase tracking-[0.32em] text-purple-400 mb-2">{card.label}</p>
-                    <p className="text-slate-200 text-sm leading-6">{card.value}</p>
-                  </div>
-                ))}
-              </div>
+            <h1 className="mb-6 text-5xl font-black leading-none tracking-tighter md:text-8xl">
+              DEEP{' '}
+              <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent">
+                VAGADIYA
+              </span>
+            </h1>
+
+            <p className="mb-10 max-w-3xl text-base leading-relaxed text-slate-400 md:text-xl">
+              Computer Science Student at <span className="font-medium text-white">Birla Vishvakarma Mahavidyalaya</span>.
+              Combining clean coding languages, data structures, and the MERN stack to craft elegant responsive platforms.
+            </p>
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <a
+                href="#projects"
+                className="flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-black shadow-xl shadow-white/5 transition-transform hover:scale-105"
+              >
+                Explore Case Studies <ArrowUpRight className="h-4 w-4" />
+              </a>
+              <a
+                href="#contact"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-zinc-900 px-8 py-4 text-sm font-bold transition-colors hover:bg-zinc-800"
+              >
+                Let&apos;s Talk <Mail className="h-4 w-4 text-purple-400" />
+              </a>
+            </div>
+
+            <div className="mt-16 grid w-full max-w-4xl grid-cols-2 gap-4 text-left md:grid-cols-4">
+              {[
+                { label: 'ACADEMIC BASE', value: 'BVM Engineering' },
+                { label: 'CURRENT POSITION', value: '4th Semester CS' },
+                { label: 'DOMAINS', value: 'Python, DSA & MERN' },
+                { label: 'LOCATION', value: 'Gujarat, India' },
+              ].map((chip) => (
+                <div key={chip.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
+                  <span className="block font-mono text-[10px] uppercase tracking-wider text-purple-400/80">{chip.label}</span>
+                  <span className="mt-1 block text-sm font-semibold text-white">{chip.value}</span>
+                </div>
+              ))}
             </div>
           </section>
 
-          <section id="ecosystem" className="py-24">
+          <section id="ecosystem" className="bg-black/40 py-12">
+            <div className="mx-auto mb-8 max-w-3xl px-6 text-center">
+              <span className="font-mono text-xs uppercase tracking-widest text-purple-400">01 // PLATFORM PILLARS</span>
+              <h2 className="mt-2 text-3xl font-bold">Scalable Architecture Principles</h2>
+            </div>
             <StaggeredGrid bentoItems={bentoItems} centerText="HALCYON" />
           </section>
 
-          <section id="visuals" className="py-24 px-6 bg-black/40">
-            <div className="max-w-7xl mx-auto mb-16 text-center">
-              <div className="flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
-                <Camera className="w-4 h-4 text-purple-300" />
-                <span>Photography, motion, and premium visual storytelling</span>
-              </div>
-              <SectionHeading title="Visual Journey" subtitle="02 // PHOTOGRAPHY & MOMENTS" />
-            </div>
-            <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              A collection of captured moments, professional milestones, and the creative vision behind my development process.
-            </p>
-            </div>
-            <TestimonialsCard items={galleryItems} />
-          </section>
+          <section id="about" className="relative mx-auto max-w-7xl px-6 py-24">
+            <div className="grid items-start gap-12 md:grid-cols-12">
+              <div className="space-y-6 md:col-span-5">
+                <SectionHeading title="About My Code Journey" subtitle="02 // THE FOUNDATION" />
+                <p className="text-base leading-relaxed text-slate-400">
+                  Hi, I&apos;m Deep Vagadiya, a Computer Science student at BVM Engineering College passionate about programming,
+                  software development, problem solving, and modern tech.
+                </p>
+                <p className="text-sm leading-relaxed text-slate-400">
+                  My programming journey started in the first year with structured C development and computer science fundamentals.
+                  By second year, I actively explored DBMS architectures, networking nodes, and C++ OOP logic.
+                </p>
 
-          <section id="projects" className="py-24 px-6 max-w-7xl mx-auto">
-            <SectionHeading title="Featured Work" subtitle="03 // CASE STUDY" />
-            <GlassCard className="group relative overflow-hidden">
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="p-10 space-y-6">
-                  <div className="inline-flex items-center gap-3 rounded-3xl bg-purple-500/10 px-4 py-3 text-purple-300 w-max">
-                    <Terminal className="w-5 h-5" />
-                    Fixit Platform
-                  </div>
+                <div className="flex gap-4 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-5">
+                  <BookOpen className="mt-1 h-6 w-6 shrink-0 text-purple-400" />
                   <div>
-                    <h3 className="text-4xl font-bold">Fixit Marketplace</h3>
-                    <p className="text-slate-400 leading-relaxed text-lg">
-                      Electronics repair platform connecting customers with trusted service providers using React, Node.js, and MongoDB.
+                    <h4 className="mb-1 text-sm font-bold text-white">Birla Vishvakarma Mahavidyalaya</h4>
+                    <p className="text-xs leading-relaxed text-slate-300">
+                      Currently deep-diving into Python game mechanics, advanced data structures, and building robust full-stack
+                      platforms with React, Node, and MongoDB.
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    {['React', 'Node.js', 'MongoDB', 'TypeScript'].map((tag) => (
-                      <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.24em] text-slate-300">
-                        {tag}
-                      </span>
+                </div>
+
+                <div className="flex items-center gap-2 font-mono text-sm text-slate-400">
+                  <MapPin className="h-4 w-4 text-red-400" />
+                  <span>Vallabh Vidyanagar, Gujarat, India</span>
+                </div>
+              </div>
+
+              <div className="space-y-6 md:col-span-7">
+                <div className="relative rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
+                  <div className="absolute right-0 top-0 p-4 font-mono text-xs text-purple-500">BVM // CSE</div>
+                  <h3 className="mb-6 flex items-center gap-2 text-xl font-bold">
+                    <Award className="h-5 w-5 text-purple-400" /> Academic Milestones
+                  </h3>
+
+                  <div className="relative space-y-8 border-l border-white/10 py-2 pl-6">
+                    {[
+                      {
+                        label: 'FIRST YEAR',
+                        dotClass: 'bg-purple-500 shadow-[0_0_10px_rgba(124,58,237,0.5)]',
+                        textClass: 'text-purple-400',
+                        status: 'Completed',
+                        title: 'C Programming & Math Fundamentals',
+                        text: 'Built basic console apps, resolved algorithmic hurdles, and established foundational paradigms.',
+                      },
+                      {
+                        label: 'SECOND YEAR',
+                        dotClass: 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]',
+                        textClass: 'text-blue-400',
+                        status: 'Completed',
+                        title: 'DBMS, Computer Networks & C++ OOP',
+                        text: 'Transitioned to structured object modeling, network topology protocols, and relational query languages.',
+                      },
+                      {
+                        label: 'FOURTH SEMESTER',
+                        dotClass: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]',
+                        textClass: 'text-emerald-400',
+                        status: 'In Progress',
+                        title: 'Python, DSA, and Full-Stack MERN',
+                        text: 'Mastering complex data storage layouts, Python graphical modules, and real-world system designs.',
+                      },
+                    ].map((step) => (
+                      <div key={step.label} className="relative">
+                        <div
+                          className={`absolute -left-[31px] top-1 h-4 w-4 rounded-full border-4 border-[#0A0A0A] ${step.dotClass}`}
+                        />
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className={`font-mono text-xs ${step.textClass}`}>{step.label}</span>
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px]">
+                            {step.status}
+                          </span>
+                        </div>
+                        <h4 className="mt-1 font-bold text-white">{step.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-400">{step.text}</p>
+                      </div>
                     ))}
                   </div>
                 </div>
-                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-purple-950/40 to-blue-950/40 p-8">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(124,58,237,0.2),_transparent_40%)] pointer-events-none" />
-                  <div className="relative z-10 flex h-full items-center justify-center">
-                    <div className="w-full max-w-md aspect-video rounded-[1.5rem] border border-white/10 bg-[#111111] shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
-                      <div className="h-8 bg-[#1C1C1C] flex items-center gap-2 px-3 border-b border-white/5">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                        <span className="w-2 h-2 rounded-full bg-amber-500" />
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              </div>
+            </div>
+          </section>
+
+          <section id="photos" className="relative bg-black/60 px-6 py-24">
+            <div className="mx-auto mb-12 max-w-7xl text-center">
+              <span className="font-mono text-xs uppercase tracking-widest text-purple-400">03 // VISUAL PORTRAIT GALLERY</span>
+              <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">Hover to Unleash 3D Perspective</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-400">
+                Interact directly with my photo grid. Built using full CSS 3D perspective tilt calculations that react in real time
+                to your cursor movements.
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-0 md:grid-cols-2 md:px-6">
+              <CardContainer className="inter-var w-full">
+                <CardBody className="group/card relative h-auto w-full rounded-3xl border border-white/[0.1] bg-zinc-900/50 p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/[0.1]">
+                  <CardItem translateZ={50} className="flex items-center gap-2 text-2xl font-bold text-white">
+                    Deep Vagadiya <Sparkles className="h-5 w-5 text-purple-400" />
+                  </CardItem>
+                  <CardItem as="p" translateZ={60} className="mt-2 font-mono text-xs text-slate-400">
+                    COMPUTER SCIENCE STUDENT @ BVM ENGINEERING COLLEGE
+                  </CardItem>
+                  <CardItem translateZ={100} className="mt-6 w-full">
+                    <img
+                      src="/777A1840.jpg"
+                      onError={handleImageError}
+                      className="h-96 w-full rounded-2xl object-cover transition-all duration-500 group-hover/card:scale-[1.02] group-hover/card:shadow-xl"
+                      alt="Deep Vagadiya Portrait"
+                    />
+                  </CardItem>
+                  <div className="mt-10 flex items-center justify-between">
+                    <CardItem translateZ={30} as="span" className="font-mono text-xs text-purple-400/80">
+                      CAPTURED // 2026
+                    </CardItem>
+                    <CardItem
+                      translateZ={35}
+                      as="a"
+                      href="#about"
+                      className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-black transition-colors hover:bg-purple-500 hover:text-white"
+                    >
+                      About Me
+                    </CardItem>
+                  </div>
+                </CardBody>
+              </CardContainer>
+
+              <CardContainer className="inter-var w-full">
+                <CardBody className="group/card relative h-auto w-full rounded-3xl border border-white/[0.1] bg-zinc-900/50 p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/[0.1]">
+                  <CardItem translateZ={50} className="flex items-center gap-2 text-2xl font-bold text-white">
+                    Creative Perspective <User className="h-5 w-5 text-blue-400" />
+                  </CardItem>
+                  <CardItem as="p" translateZ={60} className="mt-2 font-mono text-xs text-slate-400">
+                    COMBINING RIGOROUS LOGIC WITH HIGH-END UI DESIGN
+                  </CardItem>
+                  <CardItem translateZ={100} className="mt-6 w-full">
+                    <img
+                      src="/IMG-20260510-WA0102(1).jpg"
+                      onError={handleImageError}
+                      className="h-96 w-full rounded-2xl object-cover transition-all duration-500 group-hover/card:scale-[1.02] group-hover/card:shadow-xl"
+                      alt="Deep Vagadiya Sunglasses"
+                    />
+                  </CardItem>
+                  <div className="mt-10 flex items-center justify-between">
+                    <CardItem translateZ={30} as="span" className="font-mono text-xs text-blue-400">
+                      OUTDOOR FOCUS // V.V. NAGAR
+                    </CardItem>
+                    <CardItem
+                      translateZ={35}
+                      as="a"
+                      href="#projects"
+                      className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-purple-500"
+                    >
+                      View Projects
+                    </CardItem>
+                  </div>
+                </CardBody>
+              </CardContainer>
+            </div>
+          </section>
+
+          <section id="skills" className="mx-auto max-w-7xl px-6 py-24">
+            <SectionHeading title="Dynamic Core Competencies" subtitle="04 // TECHNICAL SPECIFICATIONS" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {skillsData.map((block) => (
+                <GlassCard key={block.category} className="relative space-y-4 p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg border border-white/10 bg-white/5 p-2">{block.icon}</div>
+                    <h3 className="text-base font-bold text-slate-100">{block.category}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {block.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-md border border-white/5 bg-white/[0.03] px-2.5 py-1 text-xs text-slate-300 transition-all hover:border-purple-500/40 hover:bg-purple-500/5"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </section>
+
+          <section id="projects" className="mx-auto max-w-7xl px-6 py-24">
+            <SectionHeading title="Realized Formats & Platforms" subtitle="05 // HANDS-ON PROJECTS" />
+            <div className="space-y-12">
+              <GlassCard className="group relative">
+                <div className="grid gap-0 md:grid-cols-12">
+                  <div className="space-y-6 p-8 md:col-span-7 md:p-12">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl bg-purple-500/20 p-3 text-purple-400">
+                        <Terminal className="h-6 w-6" />
                       </div>
-                      <div className="p-4">
-                        <div className="h-28 rounded-3xl bg-white/5" />
+                      <div>
+                        <span className="block font-mono text-[10px] tracking-wider text-purple-400">MAIN SYSTEM INITIATIVE</span>
+                        <h3 className="text-3xl font-bold tracking-tight text-white">Fixit Repair Platform</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm leading-relaxed text-slate-400">
+                      A full-stack repair service platform connecting electronics customers with repair shops through a request-based
+                      tracking system. Incorporates dashboard tracking, image uploads, and live progress state.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 font-mono text-xs text-slate-400">
+                      {['MERN Stack Integration', 'Tracking Dashboard', 'Secure Node Server', 'Database Architecture'].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-purple-400" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {['React.js', 'Node.js', 'Express.js', 'MongoDB', 'REST APIs'].map((tag) => (
+                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="relative flex items-center justify-center overflow-hidden border-t border-white/10 bg-gradient-to-br from-purple-950/30 to-[#0A0A0A] p-8 md:col-span-5 md:border-l md:border-t-0">
+                    <div className="aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-[#13131F] shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
+                      <div className="flex h-6 w-full items-center gap-1.5 border-b border-white/15 bg-zinc-900 px-3">
+                        <div className="h-2 w-2 rounded-full bg-red-500/60" />
+                        <div className="h-2 w-2 rounded-full bg-yellow-500/60" />
+                        <div className="h-2 w-2 rounded-full bg-green-500/60" />
+                      </div>
+                      <div className="space-y-3 p-4 font-mono text-[10px] text-purple-400">
+                        <div className="flex justify-between border-b border-white/5 pb-1">
+                          <span>$ fixit-server --status</span>
+                          <span className="text-emerald-400">ONLINE</span>
+                        </div>
+                        <p className="text-slate-400">Connected to mongodb cluster...</p>
+                        <p className="text-slate-400">Ready on port 5000</p>
+                        <div className="flex h-12 w-full items-center justify-center rounded border border-purple-500/20 bg-purple-500/10 text-xs text-white">
+                          CUSTOMER DASHBOARD ACTIVE
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </GlassCard>
-          </section>
+              </GlassCard>
 
-          <footer id="contact" className="py-24 px-6 border-t border-white/10 bg-[#050505]">
-            <div className="max-w-7xl mx-auto flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-3xl bg-white/5 grid place-items-center text-xl font-bold text-white">
-                    D
-                  </div>
-                  <div>
-                    <p className="text-slate-300 font-semibold">Deep Vagadiya</p>
-                    <p className="text-slate-500">Crafting premium digital experiences through code.</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-4 text-slate-400 text-sm">
-                  <a href="mailto:hello@deep.dev" className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                    <Mail className="w-4 h-4" /> hello@deep.dev
-                  </a>
-                  <a href="https://deep.dev" className="inline-flex items-center gap-2 hover:text-white transition-colors">
-                    <Globe className="w-4 h-4" /> deep.dev
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-slate-400">
-                {[Github, Linkedin, Instagram, Twitter, Slack].map((Icon, index) => (
-                  <Icon key={index} className="w-6 h-6 hover:text-white transition-colors cursor-pointer" />
+              <div className="grid gap-6 md:grid-cols-2">
+                {[
+                  {
+                    title: 'NetPulse WiFi',
+                    icon: <Server className="h-5 w-5" />,
+                    iconClass: 'bg-blue-500/10 text-blue-400',
+                    labelClass: 'text-blue-400',
+                    description:
+                      'A web-based network client interface developed to manage internet usage, monitoring data pathways and secure gateway links dynamically with modern React templates.',
+                    tags: ['React.js', 'Node.js', 'MongoDB', 'APIs'],
+                    label: 'Network Management Ecosystem',
+                  },
+                  {
+                    title: 'Python Simulation Game',
+                    icon: <Monitor className="h-5 w-5" />,
+                    iconClass: 'bg-emerald-500/10 text-emerald-400',
+                    labelClass: 'text-emerald-400',
+                    description:
+                      'Designed to consolidate structured programming functions, iterative loops, dynamic coordinates, and mathematical logic modules inside an interactive graphical screen.',
+                    tags: ['Python', 'OOP', 'Logic Trees', 'Graphics'],
+                    label: 'Visual Game Logic',
+                  },
+                ].map((project) => (
+                  <GlassCard key={project.title} className="flex flex-col justify-between space-y-6 p-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`rounded-lg p-2.5 ${project.iconClass}`}>{project.icon}</div>
+                        <h4 className="text-xl font-bold">{project.title}</h4>
+                      </div>
+                      <p className="text-sm leading-relaxed text-slate-400">{project.description}</p>
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {project.tags.map((tag) => (
+                          <span key={tag} className="rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-slate-300">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <span className={`block pt-4 font-mono text-[10px] uppercase tracking-wider ${project.labelClass}`}>
+                      {project.label}
+                    </span>
+                  </GlassCard>
                 ))}
               </div>
             </div>
-            <div className="mt-12 text-center text-slate-600 text-sm">
-              © 2026 Deep Vagadiya. Built with React & Tailwind.
+          </section>
+
+          <section id="contact" className="relative mx-auto max-w-7xl px-6 py-24">
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-500/10 blur-[120px]" />
+            <div className="relative z-10 grid items-center gap-12 md:grid-cols-12">
+              <div className="md:col-span-7">
+                <SectionHeading title="Initiate Contact" subtitle="06 // SECURE CHANNEL" />
+                <p className="mb-8 max-w-lg text-sm text-slate-400">
+                  Let&apos;s collaborate on software solutions, architecture designs, or system development opportunities. Shoot a
+                  message below directly.
+                </p>
+
+                <form onSubmit={handleFormSubmit} className="max-w-xl space-y-4">
+                  <div>
+                    <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Identification / Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={formState.name}
+                      onChange={(event) => setFormState({ ...formState, name: event.target.value })}
+                      placeholder="e.g. John Doe"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Electronic Mail Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={formState.email}
+                      onChange={(event) => setFormState({ ...formState, email: event.target.value })}
+                      placeholder="your.email@gmail.com"
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Project Brief / Message</label>
+                    <textarea
+                      rows={4}
+                      required
+                      value={formState.message}
+                      onChange={(event) => setFormState({ ...formState, message: event.target.value })}
+                      placeholder="Describe requirements, timelines, or just say hi..."
+                      className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 py-4 text-sm font-bold text-white shadow-xl shadow-purple-900/10 transition-all hover:bg-purple-500"
+                  >
+                    Send Verification{' '}
+                    <Send className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-1" />
+                  </button>
+
+                  {isSubmitted && (
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center font-mono text-xs text-emerald-400">
+                      Message registered successfully! Deep will reach back to you shortly.
+                    </div>
+                  )}
+                </form>
+              </div>
+
+              <div className="space-y-6 md:col-span-5">
+                <div className="space-y-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
+                  <h4 className="font-mono text-xs uppercase tracking-widest text-purple-400">DIRECT COMMUNICATIONS</h4>
+                  <div className="space-y-4">
+                    <a
+                      href="mailto:deepvagadiya@gmail.com"
+                      className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition-all hover:border-purple-500/50 hover:bg-white/[0.04]"
+                    >
+                      <Mail className="h-5 w-5 text-purple-400" />
+                      <div>
+                        <span className="block font-mono text-[10px] text-slate-400">EMAIL INBOX</span>
+                        <span className="text-xs font-semibold text-white">deepvagadiya@gmail.com</span>
+                      </div>
+                    </a>
+                    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+                      <MapPin className="h-5 w-5 text-blue-400" />
+                      <div>
+                        <span className="block font-mono text-[10px] text-slate-400">OFFICE / CAMPUS</span>
+                        <span className="text-xs font-semibold text-white">V.V. Nagar, Gujarat, India</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative overflow-hidden rounded-2xl border border-purple-500/10 bg-gradient-to-br from-purple-950/20 to-blue-950/20 p-6">
+                  <div className="absolute right-0 top-0 p-4 opacity-5">
+                    <Terminal className="h-12 w-12 text-white" />
+                  </div>
+                  <h4 className="mb-2 font-bold text-white">CS Student Advocate</h4>
+                  <p className="text-xs leading-relaxed text-slate-400">
+                    &quot;Continuously exploring core system engineering protocols, database nodes, and front-end performance loops.
+                    Let&apos;s make digital platforms more responsive.&quot;
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <footer className="relative z-20 border-t border-white/5 bg-[#050505] px-6 py-20">
+            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-10 md:flex-row">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded bg-purple-600 font-mono text-sm font-bold">D</div>
+                  <span className="text-xl font-bold tracking-tight">Deep Vagadiya</span>
+                </div>
+                <p className="max-w-sm text-xs text-slate-500">
+                  Combining structured programming languages with elegant modern frontend system designs.
+                </p>
+              </div>
+
+              <div className="flex gap-4">
+                {[
+                  { icon: <Github className="h-5 w-5" />, href: 'https://github.com' },
+                  { icon: <Linkedin className="h-5 w-5" />, href: 'https://linkedin.com' },
+                  { icon: <Instagram className="h-5 w-5" />, href: 'https://instagram.com' },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-400 transition-all hover:border-purple-500 hover:bg-purple-500/10 hover:text-white"
+                  >
+                    {item.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 font-mono text-xs text-slate-600 sm:flex-row">
+              <span>© 2026 Deep Vagadiya. Undergrad CS Project Repository.</span>
+              <span>Birla Vishvakarma Mahavidyalaya (BVM)</span>
             </div>
           </footer>
         </main>
