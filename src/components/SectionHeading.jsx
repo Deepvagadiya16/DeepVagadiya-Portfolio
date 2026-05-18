@@ -1,10 +1,16 @@
-const SectionHeading = ({ title, subtitle }) => (
-  <div className="mb-12 space-y-2">
-    <h3 className="text-purple-500 font-mono tracking-widest text-sm uppercase">{subtitle}</h3>
-    <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-      {title}
-    </h2>
-  </div>
-);
+import React from 'react';
 
-export default SectionHeading;
+export default function SectionHeading({ title, subtitle }) {
+  return (
+    <div className="mb-12 space-y-2">
+      <div className="flex items-center gap-2">
+        <div className="h-px w-8 bg-purple-500" />
+        <h3 className="font-mono text-xs uppercase tracking-widest text-purple-500">{subtitle}</h3>
+      </div>
+      <h2 className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-5xl">
+        {title}
+      </h2>
+    </div>
+  );
+}
+

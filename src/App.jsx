@@ -1,160 +1,12 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import {
-  Github,
-  Linkedin,
-  Mail,
-  Code2,
-  Cpu,
-  Globe,
-  Layers,
-  Server,
-  Monitor,
-  Zap,
-  CheckCircle2,
-  Instagram,
-  Terminal,
-  Slack,
-  Twitter,
-  ArrowUpRight,
-  User,
-  MapPin,
-  BookOpen,
-  Send,
-  Sparkles,
-  Award,
-} from 'lucide-react';
-
-const MouseEnterContext = createContext([false, () => {}]);
-
-const CardContainer = ({ children, className = '', containerClassName = '' }) => {
-  const containerRef = useRef(null);
-  const [isMouseEnter, setIsMouseEnter] = useState(false);
-
-  const handleMouseMove = (event) => {
-    if (!containerRef.current) return;
-
-    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
-    const x = (event.clientX - left - width / 2) / 12;
-    const y = (event.clientY - top - height / 2) / 12;
-    containerRef.current.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (!containerRef.current) return;
-    setIsMouseEnter(false);
-    containerRef.current.style.transform = 'rotateY(0deg) rotateX(0deg)';
-  };
-
-  return (
-    <MouseEnterContext.Provider value={[isMouseEnter, setIsMouseEnter]}>
-      <div className={`flex items-center justify-center ${containerClassName}`} style={{ perspective: '1000px' }}>
-        <div
-          ref={containerRef}
-          onMouseEnter={() => setIsMouseEnter(true)}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className={`relative flex items-center justify-center transition-all duration-200 ease-out ${className}`}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
-          {children}
-        </div>
-      </div>
-    </MouseEnterContext.Provider>
-  );
-};
-
-const CardBody = ({ children, className = '' }) => (
-  <div className={`h-full w-full [transform-style:preserve-3d] ${className}`}>{children}</div>
-);
-
-const CardItem = ({
-  as: Tag = 'div',
-  children,
-  className = '',
-  translateZ = 0,
-  translateX = 0,
-  translateY = 0,
-  rotateX = 0,
-  rotateY = 0,
-  rotateZ = 0,
-  ...rest
-}) => {
-  const [isMouseEnter] = useContext(MouseEnterContext);
-  const transform = isMouseEnter
-    ? `translateZ(${translateZ}px) translateX(${translateX}px) translateY(${translateY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`
-    : 'translateZ(0px) translateX(0px) translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)';
-
-  return (
-    <Tag className={`transition-all duration-300 ease-out ${className}`} style={{ transform, transformStyle: 'preserve-3d' }} {...rest}>
-      {children}
-    </Tag>
-  );
-};
-
-const SmoothScroll = ({ children }) => <div className="smooth-scroll-wrapper overflow-x-hidden">{children}</div>;
-
-const GlassCard = ({ children, className = '' }) => (
-  <div
-    className={`overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl transition-all duration-500 hover:border-purple-500/30 ${className}`}
-  >
-    {children}
-  </div>
-);
-
-const SectionHeading = ({ title, subtitle }) => (
-  <div className="mb-12 space-y-2">
-    <div className="flex items-center gap-2">
-      <div className="h-px w-8 bg-purple-500" />
-      <h3 className="font-mono text-xs uppercase tracking-widest text-purple-500">{subtitle}</h3>
-    </div>
-    <h2 className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-5xl">
-      {title}
-    </h2>
-  </div>
-);
-
-const StaggeredGrid = ({ bentoItems, centerText }) => (
-  <div className="relative w-full overflow-hidden py-12">
-    <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
-      <h2 className="whitespace-nowrap text-[15vw] font-black uppercase leading-none tracking-tighter text-white/[0.015] md:text-[18vw]">
-        {centerText}
-      </h2>
-    </div>
-
-    <div className="relative z-10 mx-auto max-w-7xl px-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {bentoItems.map((item) => (
-          <div
-            key={item.id}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40 backdrop-blur-md transition-all duration-500 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(124,58,237,0.15)]"
-          >
-            <div className="absolute inset-0 z-0 h-80">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-full w-full object-cover opacity-20 transition-all duration-700 group-hover:scale-105 group-hover:opacity-40"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-transparent" />
-            </div>
-
-            <div className="relative z-10 flex flex-col justify-end p-8 pt-44">
-              <div className="mb-3 flex items-center gap-2">
-                <div className="rounded-lg bg-purple-500/10 p-2 text-purple-400">{item.icon}</div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-purple-400">{item.subtitle}</span>
-              </div>
-              <h3 className="mb-2 text-xl font-bold text-white">{item.title}</h3>
-              <p className="text-sm leading-relaxed text-slate-400">{item.description}</p>
-              <div className="mt-4 flex items-center gap-1.5 font-mono text-xs text-purple-400/80 transition-colors group-hover:text-purple-400">
-                <span>Explore Repository</span>
-                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
+import React, { useEffect, useState } from 'react';
+import {Github, Linkedin, Mail, Code2, Cpu, Globe, Layers, Server, Monitor, Zap, CheckCircle2, Instagram, Terminal, Slack, Twitter, User, MapPin, ArrowUpRight, BookOpen, Send, Sparkles, Award,} from 'lucide-react';
+import Nav from './components/Nav';
+import SmoothScroll from './components/SmoothScroll';
+import SectionHeading from './components/SectionHeading';
+import StaggeredGrid from './components/StaggeredGrid';
+import GlassCard from './components/GlassCard';
+import Footer from './components/Footer';
+import { CardContainer, CardBody, CardItem } from './components/InteractiveCard';
 
 const bentoItems = [
   {
@@ -206,8 +58,7 @@ const skillsData = [
   },
 ];
 
-const portraitFallback =
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop';
+const portraitFallback = 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop';
 
 export default function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -244,7 +95,7 @@ export default function App() {
 
   return (
     <SmoothScroll>
-      <div className="min-h-screen overflow-hidden bg-[#0A0A0A] font-sans text-white selection:bg-purple-500/30">
+      <div className="app-root">
         <div
           className="pointer-events-none fixed inset-0 z-0 opacity-40 transition-opacity duration-300"
           style={{
@@ -253,80 +104,44 @@ export default function App() {
         />
         <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,#1f1f2e_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.05] [mask-image:radial-gradient(ellipse_600px_600px_at_50%_50%,#000_40%,transparent_100%)]" />
 
-        <nav
-          className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-            isScrolled ? 'border-b border-white/10 bg-[#0A0A0A]/80 py-4 backdrop-blur-md' : 'bg-transparent py-6'
-          }`}
-        >
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
-            <a href="#home" className="group flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-600 to-blue-600 font-mono text-xl font-bold shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-transform group-hover:rotate-12">
-                D
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold leading-none tracking-tight">Deep Vagadiya</span>
-                <span className="mt-1 font-mono text-[10px] uppercase tracking-wider text-purple-400">CS @ BVM</span>
-              </div>
-            </a>
+        <Nav isScrolled={isScrolled} />
 
-            <div className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
-              {['Home', 'About', 'Photos', 'Skills', 'Projects', 'Contact'].map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="tracking-wide transition-colors hover:text-white">
-                  {item}
-                </a>
-              ))}
-              <a
-                href="#contact"
-                className="rounded-full bg-white px-5 py-2 text-xs font-bold text-black shadow-[0_4px_12px_rgba(255,255,255,0.1)] transition-all hover:bg-purple-500 hover:text-white"
-              >
-                Hire Founder
-              </a>
-            </div>
-          </div>
-        </nav>
-
-        <main className="relative z-10">
-          <section id="home" className="relative flex min-h-[92vh] flex-col items-center justify-center px-6 pb-20 pt-36 text-center">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-purple-400">
+        <main className="main">
+          <section id="home" className="section section-hero">
+            <div className="kicker">
               <Zap className="h-3.5 w-3.5 animate-pulse text-yellow-400" />
               EXPLORING CORE COMPUTER SCIENCE & DEVELOPMENT
             </div>
 
-            <h1 className="mb-6 text-5xl font-black leading-none tracking-tighter md:text-8xl">
+            <h1 className="hero-title">
               DEEP{' '}
               <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent">
                 VAGADIYA
               </span>
             </h1>
 
-            <p className="mb-10 max-w-3xl text-base leading-relaxed text-slate-400 md:text-xl">
+            <p className="hero-sub">
               Computer Science Student at <span className="font-medium text-white">Birla Vishvakarma Mahavidyalaya</span>.
               Combining clean coding languages, data structures, and the MERN stack to craft elegant responsive platforms.
             </p>
 
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#projects"
-                className="flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-black shadow-xl shadow-white/5 transition-transform hover:scale-105"
-              >
+            <div className="cta-group">
+              <a href="#projects" className="btn btn-primary flex items-center justify-center gap-2">
                 Explore Case Studies <ArrowUpRight className="h-4 w-4" />
               </a>
-              <a
-                href="#contact"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-zinc-900 px-8 py-4 text-sm font-bold transition-colors hover:bg-zinc-800"
-              >
+              <a href="#contact" className="btn-ghost flex items-center justify-center gap-2">
                 Let&apos;s Talk <Mail className="h-4 w-4 text-purple-400" />
               </a>
             </div>
 
-            <div className="mt-16 grid w-full max-w-4xl grid-cols-2 gap-4 text-left md:grid-cols-4">
+            <div className="stats-grid">
               {[
                 { label: 'ACADEMIC BASE', value: 'BVM Engineering' },
                 { label: 'CURRENT POSITION', value: '4th Semester CS' },
                 { label: 'DOMAINS', value: 'Python, DSA & MERN' },
                 { label: 'LOCATION', value: 'Gujarat, India' },
               ].map((chip) => (
-                <div key={chip.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
+                <div key={chip.label} className="chip">
                   <span className="block font-mono text-[10px] uppercase tracking-wider text-purple-400/80">{chip.label}</span>
                   <span className="mt-1 block text-sm font-semibold text-white">{chip.value}</span>
                 </div>
@@ -334,7 +149,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="ecosystem" className="bg-black/40 py-12">
+          <section id="ecosystem" className="section">
             <div className="mx-auto mb-8 max-w-3xl px-6 text-center">
               <span className="font-mono text-xs uppercase tracking-widest text-purple-400">01 // PLATFORM PILLARS</span>
               <h2 className="mt-2 text-3xl font-bold">Scalable Architecture Principles</h2>
@@ -342,7 +157,7 @@ export default function App() {
             <StaggeredGrid bentoItems={bentoItems} centerText="HALCYON" />
           </section>
 
-          <section id="about" className="relative mx-auto max-w-7xl px-6 py-24">
+          <section id="about" className="section">
             <div className="grid items-start gap-12 md:grid-cols-12">
               <div className="space-y-6 md:col-span-5">
                 <SectionHeading title="About My Code Journey" subtitle="02 // THE FOUNDATION" />
@@ -355,7 +170,7 @@ export default function App() {
                   By second year, I actively explored DBMS architectures, networking nodes, and C++ OOP logic.
                 </p>
 
-                <div className="flex gap-4 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-5">
+                <div className="highlight">
                   <BookOpen className="mt-1 h-6 w-6 shrink-0 text-purple-400" />
                   <div>
                     <h4 className="mb-1 text-sm font-bold text-white">Birla Vishvakarma Mahavidyalaya</h4>
@@ -366,7 +181,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 font-mono text-sm text-slate-400">
+                <div className="meta">
                   <MapPin className="h-4 w-4 text-red-400" />
                   <span>Vallabh Vidyanagar, Gujarat, India</span>
                 </div>
@@ -379,7 +194,7 @@ export default function App() {
                     <Award className="h-5 w-5 text-purple-400" /> Academic Milestones
                   </h3>
 
-                  <div className="relative space-y-8 border-l border-white/10 py-2 pl-6">
+                  <div className="timeline">
                     {[
                       {
                         label: 'FIRST YEAR',
@@ -406,7 +221,7 @@ export default function App() {
                         text: 'Mastering complex data storage layouts, Python graphical modules, and real-world system designs.',
                       },
                     ].map((step) => (
-                      <div key={step.label} className="relative">
+                      <div key={step.label} className="timeline-item">
                         <div
                           className={`absolute -left-[31px] top-1 h-4 w-4 rounded-full border-4 border-[#0A0A0A] ${step.dotClass}`}
                         />
@@ -426,7 +241,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="photos" className="relative bg-black/60 px-6 py-24">
+          <section id="photos" className="gallery">
             <div className="mx-auto mb-12 max-w-7xl text-center">
               <span className="font-mono text-xs uppercase tracking-widest text-purple-400">03 // VISUAL PORTRAIT GALLERY</span>
               <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">Hover to Unleash 3D Perspective</h2>
@@ -438,7 +253,7 @@ export default function App() {
 
             <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-0 md:grid-cols-2 md:px-6">
               <CardContainer className="inter-var w-full">
-                <CardBody className="group/card relative h-auto w-full rounded-3xl border border-white/[0.1] bg-zinc-900/50 p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/[0.1]">
+                <CardBody className="group/card card card-inner relative h-auto w-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/[0.1]">
                   <CardItem translateZ={50} className="flex items-center gap-2 text-2xl font-bold text-white">
                     Deep Vagadiya <Sparkles className="h-5 w-5 text-purple-400" />
                   </CardItem>
@@ -446,12 +261,7 @@ export default function App() {
                     COMPUTER SCIENCE STUDENT @ BVM ENGINEERING COLLEGE
                   </CardItem>
                   <CardItem translateZ={100} className="mt-6 w-full">
-                    <img
-                      src="/777A1840.jpg"
-                      onError={handleImageError}
-                      className="h-96 w-full rounded-2xl object-cover transition-all duration-500 group-hover/card:scale-[1.02] group-hover/card:shadow-xl"
-                      alt="Deep Vagadiya Portrait"
-                    />
+                    <img src="/777A1840.jpg" onError={handleImageError} className="img-lg" alt="Deep Vagadiya Portrait" />
                   </CardItem>
                   <div className="mt-10 flex items-center justify-between">
                     <CardItem translateZ={30} as="span" className="font-mono text-xs text-purple-400/80">
@@ -470,7 +280,7 @@ export default function App() {
               </CardContainer>
 
               <CardContainer className="inter-var w-full">
-                <CardBody className="group/card relative h-auto w-full rounded-3xl border border-white/[0.1] bg-zinc-900/50 p-6 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/[0.1]">
+                <CardBody className="group/card card card-inner relative h-auto w-full transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/[0.1]">
                   <CardItem translateZ={50} className="flex items-center gap-2 text-2xl font-bold text-white">
                     Creative Perspective <User className="h-5 w-5 text-blue-400" />
                   </CardItem>
@@ -478,12 +288,7 @@ export default function App() {
                     COMBINING RIGOROUS LOGIC WITH HIGH-END UI DESIGN
                   </CardItem>
                   <CardItem translateZ={100} className="mt-6 w-full">
-                    <img
-                      src="/IMG-20260510-WA0102(1).jpg"
-                      onError={handleImageError}
-                      className="h-96 w-full rounded-2xl object-cover transition-all duration-500 group-hover/card:scale-[1.02] group-hover/card:shadow-xl"
-                      alt="Deep Vagadiya Sunglasses"
-                    />
+                    <img src="/IMG-20260510-WA0102(1).jpg" onError={handleImageError} className="img-lg" alt="Deep Vagadiya Sunglasses" />
                   </CardItem>
                   <div className="mt-10 flex items-center justify-between">
                     <CardItem translateZ={30} as="span" className="font-mono text-xs text-blue-400">
@@ -503,7 +308,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="skills" className="mx-auto max-w-7xl px-6 py-24">
+          <section id="skills" className="section">
             <SectionHeading title="Dynamic Core Competencies" subtitle="04 // TECHNICAL SPECIFICATIONS" />
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {skillsData.map((block) => (
@@ -514,10 +319,7 @@ export default function App() {
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     {block.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="rounded-md border border-white/5 bg-white/[0.03] px-2.5 py-1 text-xs text-slate-300 transition-all hover:border-purple-500/40 hover:bg-purple-500/5"
-                      >
+                      <span key={skill} className="badge-small">
                         {skill}
                       </span>
                     ))}
@@ -527,7 +329,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="projects" className="mx-auto max-w-7xl px-6 py-24">
+          <section id="projects" className="section">
             <SectionHeading title="Realized Formats & Platforms" subtitle="05 // HANDS-ON PROJECTS" />
             <div className="space-y-12">
               <GlassCard className="group relative">
@@ -556,7 +358,7 @@ export default function App() {
                     </div>
                     <div className="flex flex-wrap gap-2 pt-2">
                       {['React.js', 'Node.js', 'Express.js', 'MongoDB', 'REST APIs'].map((tag) => (
-                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                        <span key={tag} className="badge-small">
                           {tag}
                         </span>
                       ))}
@@ -617,7 +419,7 @@ export default function App() {
                       <p className="text-sm leading-relaxed text-slate-400">{project.description}</p>
                       <div className="flex flex-wrap gap-2 pt-2">
                         {project.tags.map((tag) => (
-                          <span key={tag} className="rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-slate-300">
+                          <span key={tag} className="badge-small">
                             {tag}
                           </span>
                         ))}
@@ -632,7 +434,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="contact" className="relative mx-auto max-w-7xl px-6 py-24">
+          <section id="contact" className="contact">
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-500/10 blur-[120px]" />
             <div className="relative z-10 grid items-center gap-12 md:grid-cols-12">
               <div className="md:col-span-7">
@@ -645,42 +447,18 @@ export default function App() {
                 <form onSubmit={handleFormSubmit} className="max-w-xl space-y-4">
                   <div>
                     <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Identification / Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={formState.name}
-                      onChange={(event) => setFormState({ ...formState, name: event.target.value })}
-                      placeholder="e.g. John Doe"
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
-                    />
+                    <input type="text" required value={formState.name} onChange={(event) => setFormState({ ...formState, name: event.target.value })} placeholder="e.g. John Doe" className="form-input" />
                   </div>
                   <div>
                     <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Electronic Mail Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={formState.email}
-                      onChange={(event) => setFormState({ ...formState, email: event.target.value })}
-                      placeholder="your.email@gmail.com"
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
-                    />
+                    <input type="email" required value={formState.email} onChange={(event) => setFormState({ ...formState, email: event.target.value })} placeholder="your.email@gmail.com" className="form-input" />
                   </div>
                   <div>
                     <label className="mb-2 block font-mono text-xs uppercase text-slate-400">Project Brief / Message</label>
-                    <textarea
-                      rows={4}
-                      required
-                      value={formState.message}
-                      onChange={(event) => setFormState({ ...formState, message: event.target.value })}
-                      placeholder="Describe requirements, timelines, or just say hi..."
-                      className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
-                    />
+                    <textarea rows={4} required value={formState.message} onChange={(event) => setFormState({ ...formState, message: event.target.value })} placeholder="Describe requirements, timelines, or just say hi..." className="form-input resize-none" />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 py-4 text-sm font-bold text-white shadow-xl shadow-purple-900/10 transition-all hover:bg-purple-500"
-                  >
+                  <button type="submit" className="btn-primary group flex w-full items-center justify-center gap-2">
                     Send Verification{' '}
                     <Send className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-1" />
                   </button>
@@ -697,17 +475,14 @@ export default function App() {
                 <div className="space-y-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
                   <h4 className="font-mono text-xs uppercase tracking-widest text-purple-400">DIRECT COMMUNICATIONS</h4>
                   <div className="space-y-4">
-                    <a
-                      href="mailto:deepvagadiya@gmail.com"
-                      className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition-all hover:border-purple-500/50 hover:bg-white/[0.04]"
-                    >
+                    <a href="mailto:deepvagadiya@gmail.com" className="info-box">
                       <Mail className="h-5 w-5 text-purple-400" />
                       <div>
                         <span className="block font-mono text-[10px] text-slate-400">EMAIL INBOX</span>
                         <span className="text-xs font-semibold text-white">deepvagadiya@gmail.com</span>
                       </div>
                     </a>
-                    <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+                    <div className="info-box">
                       <MapPin className="h-5 w-5 text-blue-400" />
                       <div>
                         <span className="block font-mono text-[10px] text-slate-400">OFFICE / CAMPUS</span>
@@ -731,42 +506,7 @@ export default function App() {
             </div>
           </section>
 
-          <footer className="relative z-20 border-t border-white/5 bg-[#050505] px-6 py-20">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-10 md:flex-row">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded bg-purple-600 font-mono text-sm font-bold">D</div>
-                  <span className="text-xl font-bold tracking-tight">Deep Vagadiya</span>
-                </div>
-                <p className="max-w-sm text-xs text-slate-500">
-                  Combining structured programming languages with elegant modern frontend system designs.
-                </p>
-              </div>
-
-              <div className="flex gap-4">
-                {[
-                  { icon: <Github className="h-5 w-5" />, href: 'https://github.com' },
-                  { icon: <Linkedin className="h-5 w-5" />, href: 'https://linkedin.com' },
-                  { icon: <Instagram className="h-5 w-5" />, href: 'https://instagram.com' },
-                ].map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-400 transition-all hover:border-purple-500 hover:bg-purple-500/10 hover:text-white"
-                  >
-                    {item.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 font-mono text-xs text-slate-600 sm:flex-row">
-              <span>© 2026 Deep Vagadiya. Undergrad CS Project Repository.</span>
-              <span>Birla Vishvakarma Mahavidyalaya (BVM)</span>
-            </div>
-          </footer>
+          <Footer />
         </main>
       </div>
     </SmoothScroll>
